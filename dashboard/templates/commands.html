@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Command Activity & Audit Trail - Cowrie Honeypot SOC{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Interactive Command Activity & Audit Trail</h1>
+    <p class="page-subtitle">Verbatim command inputs captured inside Cowrie's virtual shell environment.</p>
+  </div>
+  <div>
+    <span class="badge badge-warning" style="font-size: 0.85rem; padding: 6px 12px;">Total Commands: {{ commands_data.total_executed }}</span>
+  </div>
+</div>
+
+<div class="alert-banner">
+  <div>
+    <strong>Human Cadence Analysis:</strong> In Session <code>980210c2cbb3</code>, commands were entered with intervals between 18 and 46 seconds (<code>whoami</code> &rarr; +18s &rarr; <code>hostname</code> &rarr; +26s &rarr; <code>pwd</code> &rarr; +23s &rarr; <code>ls</code> &rarr; +10s &rarr; <code>ls</code> &rarr; +46s &rarr; <code>exit</code>).
+    This irregular, multi-second pacing is a textbook indicator of manual human keystrokes rather than pre-programmed automated exploitation scripts.
+  </div>
+</div>
+
+<div class="table-card">
+  <h3>Recorded Command Execution Log</h3>
+  <table class="custom-table">
+    <thead>
+      <tr>
+        <th>Execution Timestamp (UTC)</th>
+        <th>Session</th>
+        <th>Input Command</th>
+        <th>MITRE Technique</th>
+        <th>Tactic</th>
+        <th>Tactical Objective / Rationale</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for cmd in commands_data.detailed_commands %}
+      <tr>
+        <td style="font-family: var(--font-mono); font-size: 0.85rem;">{{ cmd.timestamp }}</td>
+        <td><code>{{ cmd.session_id }}</code></td>
+        <td><strong style="color: #38bdf8; font-size: 0.95rem;"><code>{{ cmd.raw_command }}</code></strong></td>
+        <td>
+          <a href="https://attack.mitre.org/techniques/{{ cmd.technique_id.replace('.', '/') }}/" target="_blank" style="color: #a78bfa; text-decoration: none; font-weight: 600;">
+            {{ cmd.technique_id }} ({{ cmd.technique_name }})
+          </a>
+        </td>
+        <td><span class="badge badge-purple">{{ cmd.tactic }}</span></td>
+        <td style="font-size: 0.85rem; color: #cbd5e1;">{{ cmd.rationale }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="table-card">
+  <h3>Command Execution Breakdown</h3>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;">
+    {% for cmd_name, count in commands_data.command_occurrences.items() %}
+    <div style="background: var(--bg-secondary); padding: 14px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+      <div style="font-size: 1.1rem; color: var(--accent-cyan); font-family: var(--font-mono); font-weight: bold;">`{{ cmd_name }}`</div>
+      <div style="font-size: 1.5rem; font-weight: bold; margin-top: 4px; color: #fff;">{{ count }}</div>
+      <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Executions</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

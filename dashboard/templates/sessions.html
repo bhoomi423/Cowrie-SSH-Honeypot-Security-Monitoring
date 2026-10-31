@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Session Analysis & Timelines - Cowrie Honeypot SOC{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">SSH Session Deep Analysis & Timelines</h1>
+    <p class="page-subtitle">Reconstruction of attacker/operator interaction sessions and terminal lifecycles.</p>
+  </div>
+</div>
+
+<div class="charts-grid" style="grid-template-columns: 1fr;">
+  <div class="chart-card">
+    <h3>Session Engagement Duration Comparison</h3>
+    <img src="{{ url_for('static', filename='images/session_durations.png') }}" style="max-height: 380px; object-fit: contain;" alt="Session Duration Comparison">
+  </div>
+</div>
+
+{% for item in timelines %}
+{% set sess = item.session_data %}
+<div class="table-card" id="{{ item.session_id }}" style="margin-top: 30px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 16px;">
+    <div>
+      <h2 style="font-size: 1.25rem; color: #fff;">Session: <code>{{ item.session_id }}</code></h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 2px;">
+        Type: <span class="badge badge-purple">{{ sess.traffic_type }}</span> &bull; Duration: <strong>{{ sess.duration_seconds }}s</strong> ({{ sess.duration_ms }} ms)
+      </p>
+    </div>
+    <div>
+      <span class="badge badge-success">Login: SUCCESS</span>
+    </div>
+  </div>
+
+  <!-- Session Metadata Grid -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; background: var(--bg-secondary); padding: 14px; border-radius: 8px; margin-bottom: 20px; font-size: 0.88rem;">
+    <div>
+      <span style="color: var(--text-muted);">Source Endpoint:</span><br>
+      <code>{{ sess.src_ip }}:{{ sess.src_port }}</code>
+    </div>
+    <div>
+      <span style="color: var(--text-muted);">Destination / Port:</span><br>
+      <code>{{ sess.dst_ip }}:{{ sess.dst_port }}</code>
+    </div>
+    <div>
+      <span style="color: var(--text-muted);">Authenticated User:</span><br>
+      <strong>{{ sess.successful_logins[0].username if sess.successful_logins else 'N/A' }}</strong>
+    </div>
+    <div>
+      <span style="color: var(--text-muted);">Password Telemetry:</span><br>
+      <code style="color: var(--accent-amber);">[REDACTED] (Protected)</code>
+    </div>
+    <div>
+      <span style="color: var(--text-muted);">SSH Client Version:</span><br>
+      <code>{{ sess.ssh_version }}</code>
+    </div>
+    <div>
+      <span style="color: var(--text-muted);">HASSH Fingerprint:</span><br>
+      <code>{{ sess.hassh }}</code>
+    </div>
+    <div>
+      <span style="color: var(--text-muted);">Emulated Environment:</span><br>
+      <code>{{ sess.arch }} | {{ sess.terminal_size }} | {{ sess.locale }}</code>
+    </div>
+    <div>
+      <span style="color: var(--text-muted);">TTY Recording Log:</span><br>
+      <code>{{ sess.ttylog_shasum[:16] }}... ({{ sess.ttylog_duration_ms }} ms)</code>
+    </div>
+  </div>
+
+  <!-- Chronological Timeline -->
+  <h3 style="font-size: 1.05rem; margin-bottom: 12px; color: var(--accent-cyan);">Session Event Chronology</h3>
+  <div class="timeline">
+    {% for ev in item.timeline_events %}
+    <div class="timeline-item">
+      <div class="timeline-date">{{ ev.timestamp }}</div>
+      <div class="timeline-content">
+        <span class="badge badge-{{ ev.badge }}">{{ ev.event_type }}</span>
+        <span style="margin-left: 8px; color: #e2e8f0;">{{ ev.summary }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

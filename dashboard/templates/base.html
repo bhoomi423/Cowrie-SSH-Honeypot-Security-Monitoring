@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Cowrie Honeypot Security Monitoring{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="{{ url_for('index') }}" class="brand">
+      <span class="shield-icon">🛡️</span>
+      <span>Cowrie SSH Honeypot SOC</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('index') }}" class="{% if active_page == 'index' %}active{% endif %}">Overview</a></li>
+      <li><a href="{{ url_for('sessions_view') }}" class="{% if active_page == 'sessions' %}active{% endif %}">Sessions</a></li>
+      <li><a href="{{ url_for('commands_view') }}" class="{% if active_page == 'commands' %}active{% endif %}">Commands</a></li>
+      <li><a href="{{ url_for('threat_view') }}" class="{% if active_page == 'threat' %}active{% endif %}">Threat & MITRE</a></li>
+      <li><a href="{{ url_for('compliance_view') }}" class="{% if active_page == 'compliance' %}active{% endif %}">ISO 27001 & Risk</a></li>
+      <li><a href="{{ url_for('evidence_view') }}" class="{% if active_page == 'evidence' %}active{% endif %}">Lab Evidence</a></li>
+      <li><a href="{{ url_for('logs_view') }}" class="{% if active_page == 'logs' %}active{% endif %}">Sanitized Logs</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    {% block content %}{% endblock %}
+
+    <footer>
+      <p>MCA Information Security Management Systems &bull; Cowrie SSH Honeypot Monitoring & Security Analysis &bull; Confidential Academic Project</p>
+      <p style="font-size: 0.8rem; margin-top: 4px; color: #64748b;">All sensitive authentication credentials sanitized and protected in accordance with ISMS principles.</p>
+    </footer>
+  </div>
+</body>
+</html>

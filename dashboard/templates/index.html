@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Overview - Cowrie Honeypot SOC{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">SSH Honeypot Monitoring & Security Analysis</h1>
+    <p class="page-subtitle">Sensor: <code>{{ metrics.sensor_name }}</code> &bull; Mode: <code>{{ metrics.honeypot_mode }}</code> &bull; Host: <code>Ubuntu Server 24.04 (VMware Pro 17)</code></p>
+  </div>
+  <div>
+    <span class="badge badge-info" style="font-size: 0.85rem; padding: 6px 12px;">Sensor Status: ONLINE</span>
+  </div>
+</div>
+
+<div class="alert-banner warning">
+  <div>
+    <strong>Verified Telemetry Notice:</strong> All metrics are derived exclusively from actual Cowrie logs.
+    Source IP is <code>127.0.0.1</code>, classifying all activity as <strong>Simulated Localhost Verification Testing</strong>.
+    All passwords have been strictly sanitized (<code>[REDACTED]</code>) across all views.
+  </div>
+</div>
+
+<!-- Metrics KPI Grid -->
+<div class="metrics-grid">
+  <div class="metric-card">
+    <div class="metric-label">SSH Connections</div>
+    <div class="metric-value">{{ metrics.total_sessions }}</div>
+    <div class="metric-sub">Port 2222 Listeners</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-label">Source IPs</div>
+    <div class="metric-value">{{ metrics.total_source_ips_count }}</div>
+    <div class="metric-sub">Loopback (127.0.0.1)</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-label">Login Success Rate</div>
+    <div class="metric-value" style="color: var(--accent-green);">100%</div>
+    <div class="metric-sub">2 Success / 0 Failed</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-label">Commands Logged</div>
+    <div class="metric-value" style="color: var(--accent-amber);">{{ metrics.total_commands_executed }}</div>
+    <div class="metric-sub">{{ metrics.unique_commands_count }} Unique Commands</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-label">Engagement Time</div>
+    <div class="metric-value" style="color: var(--accent-cyan);">{{ metrics.total_engagement_seconds }}s</div>
+    <div class="metric-sub">~6m 13s Active Interaction</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-label">Threat Classification</div>
+    <div class="metric-value" style="font-size: 1.25rem; color: #a78bfa;">Simulation</div>
+    <div class="metric-sub">Controlled Host Test</div>
+  </div>
+</div>
+
+<!-- Charts Grid -->
+<div class="charts-grid">
+  <div class="chart-card">
+    <h3>Event Type Breakdown</h3>
+    <img src="{{ url_for('static', filename='images/event_distribution.png') }}" alt="Cowrie Event Type Distribution">
+  </div>
+
+  <div class="chart-card">
+    <h3>Observed Command Frequency</h3>
+    <img src="{{ url_for('static', filename='images/command_frequency.png') }}" alt="Command Execution Frequency">
+  </div>
+</div>
+
+<!-- Sessions Summary Table -->
+<div class="table-card">
+  <h3>Recorded Honeypot Sessions</h3>
+  <table class="custom-table">
+    <thead>
+      <tr>
+        <th>Session ID</th>
+        <th>Start Timestamp (UTC)</th>
+        <th>Source Endpoint</th>
+        <th>Username</th>
+        <th>Auth Status</th>
+        <th>Duration</th>
+        <th>Commands Executed</th>
+        <th>Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for sess_id, sess in sessions.items() %}
+      <tr>
+        <td><code>{{ sess_id }}</code></td>
+        <td>{{ sess.start_time }}</td>
+        <td><code>{{ sess.src_ip }}:{{ sess.src_port }}</code></td>
+        <td><strong>{{ sess.successful_logins[0].username if sess.successful_logins else 'N/A' }}</strong></td>
+        <td><span class="badge badge-success">SUCCESS</span></td>
+        <td>{{ sess.duration_seconds }}s</td>
+        <td><span class="badge badge-warning">{{ sess.commands | length }} cmds</span></td>
+        <td><a href="{{ url_for('sessions_view') }}#{{ sess_id }}" class="badge badge-info" style="text-decoration: none;">Inspect &rarr;</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

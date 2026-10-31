@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Threat Analysis & MITRE ATT&CK - Cowrie Honeypot SOC{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Threat Analysis & MITRE ATT&CK Mapping</h1>
+    <p class="page-subtitle">Empirical correlation between captured honeypot activity and cybersecurity threat frameworks.</p>
+  </div>
+  <div>
+    <span class="badge badge-purple" style="font-size: 0.85rem; padding: 6px 12px;">Framework: MITRE Enterprise v14+</span>
+  </div>
+</div>
+
+<!-- Scientific Distinction Card -->
+<div class="table-card" style="border-left: 4px solid var(--accent-purple);">
+  <h2 style="font-size: 1.25rem; color: #fff; margin-bottom: 8px;">Empirical Classification: Simulated Testing vs. External Attack</h2>
+  <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 16px;">
+    In academic information security analysis and incident response, analysts must base classifications strictly on verifiable empirical indicators.
+    The table below contrasts our observed telemetry with standard baselines of genuine in-the-wild cyberattacks.
+  </p>
+
+  <table class="custom-table">
+    <thead>
+      <tr>
+        <th style="width: 18%;">Analysis Dimension</th>
+        <th style="width: 27%;">Observed Honeypot Evidence</th>
+        <th style="width: 35%;">External Attack Baseline (Real-World)</th>
+        <th style="width: 20%;">Analyst Determination</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for dim in threat_info.empirical_distinctions %}
+      <tr>
+        <td><strong>{{ dim.dimension }}</strong></td>
+        <td><code style="color: var(--accent-cyan);">{{ dim.observed_evidence }}</code></td>
+        <td style="font-size: 0.85rem; color: var(--text-muted);">{{ dim.external_attack_baseline }}</td>
+        <td><span class="badge badge-info" style="font-size: 0.78rem;">{{ dim.conclusion }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- MITRE Chart & Summary Grid -->
+<div class="charts-grid">
+  <div class="chart-card">
+    <h3>Observed MITRE ATT&CK Tactical Breakdown</h3>
+    <img src="{{ url_for('static', filename='images/mitre_tactics.png') }}" alt="MITRE ATT&CK Tactics Chart">
+  </div>
+
+  <div class="table-card" style="margin-bottom: 0;">
+    <h3>MITRE ATT&CK Enterprise Matrix Mapping</h3>
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th>Tactic</th>
+          <th>Technique ID</th>
+          <th>Technique Name</th>
+          <th>Correlated Evidence</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-purple">Initial Access</span></td>
+          <td><a href="https://attack.mitre.org/techniques/T1078/" target="_blank" style="color: #38bdf8;">T1078</a></td>
+          <td>Valid Accounts</td>
+          <td>Login attempts for <code>testuser</code> and <code>fakeuser</code> accepted by Cowrie.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-purple">Execution</span></td>
+          <td><a href="https://attack.mitre.org/techniques/T1059/004/" target="_blank" style="color: #38bdf8;">T1059.004</a></td>
+          <td>Command & Scripting Interpreter: Unix Shell</td>
+          <td>Interactive PTY requested; shell commands executed in virtual environment.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-purple">Discovery</span></td>
+          <td><a href="https://attack.mitre.org/techniques/T1033/" target="_blank" style="color: #38bdf8;">T1033</a></td>
+          <td>System Owner/User Discovery</td>
+          <td>Execution of <code>whoami</code> to query active account privileges.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-purple">Discovery</span></td>
+          <td><a href="https://attack.mitre.org/techniques/T1082/" target="_blank" style="color: #38bdf8;">T1082</a></td>
+          <td>System Information Discovery</td>
+          <td>Execution of <code>hostname</code> to inspect honeypot node identity.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-purple">Discovery</span></td>
+          <td><a href="https://attack.mitre.org/techniques/T1083/" target="_blank" style="color: #38bdf8;">T1083</a></td>
+          <td>File & Directory Discovery</td>
+          <td>Execution of <code>pwd</code> and <code>ls</code> to inspect file structures.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

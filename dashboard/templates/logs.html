@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Sanitized Logs - Cowrie Honeypot SOC{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Sanitized Honeypot Telemetry Logs</h1>
+    <p class="page-subtitle">Standardized, redacted event records ready for SOC ingestion and academic review.</p>
+  </div>
+  <div>
+    <span class="badge badge-success" style="font-size: 0.85rem; padding: 6px 12px;">Data Sanitization: 100% Redacted</span>
+  </div>
+</div>
+
+<div class="alert-banner success">
+  <div>
+    <strong>Information Security Management Protection:</strong> In compliance with sensitive data handling standards, all plaintext passwords in this log view have been masked to <code>[REDACTED]</code>.
+    The original log files (<code>cowrie.json</code> and <code>cowrie.log</code>) remain cryptographically and structurally untouched on disk.
+  </div>
+</div>
+
+<div class="table-card">
+  <h3>Sanitized JSON Event Records (<code>data/sanitized_cowrie.json</code> - {{ json_logs | length }} Records)</h3>
+  <div class="log-box">
+{% for record in json_logs %}
+{{ record | tojson }}
+{% endfor %}
+  </div>
+</div>
+
+<div class="table-card" style="margin-top: 30px;">
+  <h3>Sanitized Twisted Text Logs (<code>data/sanitized_cowrie.log</code> - Excerpt)</h3>
+  <div class="log-box" style="max-height: 400px;">
+{{ text_log_content }}
+  </div>
+</div>
+{% endblock %}

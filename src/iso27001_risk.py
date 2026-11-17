@@ -7,7 +7,7 @@ Provides:
 2. Objective analysis of how honeypots function as detective security controls.
 3. Explicit disclaimers clarifying that this project demonstrates technical control
    implementation concepts and does not constitute organizational certification.
-4. Structured Risk Assessment matrix covering honeypot deployment risks, likelihood,
+4. Structured 5x5 Risk Assessment matrix covering honeypot deployment risks, likelihood,
    impact, risk level, and mitigation strategies.
 """
 
@@ -44,6 +44,15 @@ class ISO27001RiskManager:
                 "boundary_caveat": "Demonstrates detection and visualization techniques. Operational compliance requires continuous 24/7 SOC alerting and automated incident response workflows."
             },
             {
+                "control_id": "A.8.12",
+                "control_name": "Data leakage prevention",
+                "theme": "Technological controls",
+                "iso_objective": "Data leakage prevention measures shall be applied to systems, networks and any other devices that process, store or transmit sensitive information.",
+                "honeypot_relevance": "Honeypots capture attacker-supplied authentication data in plaintext, which could contain sensitive test passwords or inadvertently mirror valid corporate credentials. Robust data leakage controls isolate raw logs, exclude them via .gitignore from public Git repositories, and sanitize telemetry prior to presentation or ingestion.",
+                "implementation_evidence": "Automated regex data sanitization pipeline masking passwords to '[REDACTED]', .gitignore exclusion of raw cowrie.json/cowrie.log, and removal of raw credential logs from version control tracking.",
+                "boundary_caveat": "Protects against telemetry credential exposure in code repositories and reporting; enterprise environments require automated endpoint DLP and secret scanning."
+            },
+            {
                 "control_id": "A.8.20",
                 "control_name": "Network security",
                 "theme": "Technological controls",
@@ -60,6 +69,24 @@ class ISO27001RiskManager:
                 "honeypot_relevance": "Cowrie negotiates SSH key exchange algorithms, ciphers, and MACs, and calculates the client HASSH fingerprint (e.g. aae6b9604f6f3356543709a376d7f657) to audit client cryptographic capabilities.",
                 "implementation_evidence": "Extraction and display of HASSH fingerprints, cipher suites, and key exchange algorithms in parser and dashboard.",
                 "boundary_caveat": "Covers inspection of inbound cryptographic parameters; does not establish enterprise key management procedures."
+            },
+            {
+                "control_id": "A.8.9",
+                "control_name": "Configuration management",
+                "theme": "Technological controls",
+                "iso_objective": "Configurations, including security configurations, of hardware, software, services and networks shall be established, documented, implemented, monitored and reviewed.",
+                "honeypot_relevance": "Cowrie relies on hardened baseline configurations (cowrie.cfg, userdb.txt, fs.pickle) where unprivileged runtime accounts, simulated architecture, and fake filesystem hierarchies are controlled to prevent host compromise.",
+                "implementation_evidence": "Dedicated non-root 'cowrie' service user, simulated Linux environment, and structured configuration management.",
+                "boundary_caveat": "Academic prototype; production environments require centralized configuration management (Ansible, Puppet) and automated integrity checks."
+            },
+            {
+                "control_id": "A.8.8",
+                "control_name": "Management of technical vulnerabilities",
+                "theme": "Technological controls",
+                "iso_objective": "Information about technical vulnerabilities of information systems in use shall be obtained, the organization's exposure to such vulnerabilities evaluated and appropriate measures taken.",
+                "honeypot_relevance": "Honeypots run complex emulated network protocol stacks (Twisted SSH). Staying secure requires continuous patch management of Python packages, host operating system (Ubuntu 24.04 LTS), and VM hypervisor.",
+                "implementation_evidence": "Tracking host platform security updates, pinning Python dependencies, and running in an isolated virtual machine.",
+                "boundary_caveat": "Demonstrates host patching considerations; does not replace enterprise vulnerability scanning and patch management tooling."
             },
             {
                 "control_id": "A.5.24",
@@ -104,7 +131,7 @@ class ISO27001RiskManager:
                 "impact": "Very High (5)",
                 "risk_score": 10,
                 "risk_level": "Medium",
-                "mitigation": "1. Run Cowrie under a non-root unprivileged service account ('cowrie').\n2. Deploy inside isolated Docker/LXC container or dedicated VM.\n3. Keep host OS (Ubuntu 24.04) and Python packages updated with latest security patches.\n4. Apply AppArmor / SELinux containment profiles.",
+                "mitigation": "1. Run Cowrie under a dedicated non-root unprivileged service account ('cowrie').\n2. Deploy inside isolated Docker/LXC container or dedicated VM.\n3. Keep host OS (Ubuntu 24.04) and Python packages updated with latest security patches.\n4. Apply AppArmor / SELinux containment profiles.",
                 "residual_risk": "Low"
             },
             {
@@ -120,14 +147,14 @@ class ISO27001RiskManager:
             },
             {
                 "risk_id": "RSK-03",
-                "threat_event": "Plaintext Credential Exposure in Logs & Dashboards",
-                "vulnerability": "Cowrie records all entered passwords in plaintext; logs or dashboards could leak sensitive internal or test credentials.",
+                "threat_event": "Plaintext Credential Exposure in Logs & Git Repositories",
+                "vulnerability": "Cowrie records all entered passwords in plaintext; raw logs tracked in version control or dashboards could leak sensitive internal or test credentials.",
                 "likelihood": "High (4)",
                 "impact": "High (4)",
                 "risk_score": 16,
                 "risk_level": "High",
-                "mitigation": "1. Automated data sanitization engine redacting passwords to '[REDACTED]' in data exports, UI, and reports.\n2. Restrict filesystem permissions on raw log files (chmod 600 cowrie.json).\n3. Enforce principle that honeypot passwords must never match legitimate corporate directory credentials.",
-                "residual_risk": "Low (mitigated by project sanitization architecture)"
+                "mitigation": "1. Automated data sanitization engine redacting passwords to '[REDACTED]' in data exports, UI, and reports.\n2. Enforce strict .gitignore rules to prevent raw log files from being staged in Git.\n3. Untrack raw logs (git rm --cached) from public repository.\n4. Restrict filesystem permissions on raw log files (chmod 600 cowrie.json).\n5. Enforce principle that honeypot passwords must never match legitimate corporate directory credentials.",
+                "residual_risk": "Low (fully controlled by sanitization & repository isolation)"
             },
             {
                 "risk_id": "RSK-04",
@@ -150,6 +177,28 @@ class ISO27001RiskManager:
                 "risk_level": "Medium",
                 "mitigation": "1. Programmatic classification engine that identifies loopback (127.0.0.1) and known test IP ranges.\n2. Tune SIEM alerting rules to differentiate between verification testing and unauthorized network probing.",
                 "residual_risk": "Low"
+            },
+            {
+                "risk_id": "RSK-06",
+                "threat_event": "Honeypot Fingerprinting & Attacker Evasion",
+                "vulnerability": "Adversaries probe system quirks (e.g. missing /proc entries, rigid command outputs, default Cowrie SSH banner) to detect deception and abort before full analysis.",
+                "likelihood": "Medium (3)",
+                "impact": "Low (2)",
+                "risk_score": 6,
+                "risk_level": "Low",
+                "mitigation": "1. Customize the SSH banner and client handshake algorithms to match legitimate target servers.\n2. Populate rich fake filesystem entries and command outputs in fs.pickle.\n3. Monitor client HASSH fingerprints to detect specialized scanner tools.",
+                "residual_risk": "Low"
+            },
+            {
+                "risk_id": "RSK-07",
+                "threat_event": "Insecure Web SOC Dashboard Configuration",
+                "vulnerability": "Monitoring dashboard exposed without authentication, missing HTTP security headers, or vulnerable to directory traversal.",
+                "likelihood": "Medium (3)",
+                "impact": "High (4)",
+                "risk_score": 12,
+                "risk_level": "Medium",
+                "mitigation": "1. Bind dashboard exclusively to loopback interface (127.0.0.1).\n2. Enforce strict HTTP security headers (CSP, X-Content-Type-Options, X-Frame-Options, HSTS).\n3. Sanitize and validate file paths using secure_filename and extension whitelisting on media endpoints.\n4. Disable debug mode in production deployment.",
+                "residual_risk": "Low (hardened in dashboard/app.py)"
             }
         ]
 
@@ -162,8 +211,8 @@ class ISO27001RiskManager:
             "title": "ISO/IEC 27001:2022 Academic Alignment Disclaimer",
             "statement": (
                 "This project demonstrates the technical implementation, logging capabilities, "
-                "and threat monitoring principles referenced in ISO/IEC 27001:2022 Annex A controls "
-                "(specifically A.8.15, A.8.16, A.8.20, A.8.24, A.5.24, A.5.25, and A.8.7). "
+                "data protection, and threat monitoring principles referenced in ISO/IEC 27001:2022 Annex A controls "
+                "(specifically A.8.15, A.8.16, A.8.12, A.8.20, A.8.24, A.8.9, A.8.8, A.5.24, A.5.25, and A.8.7). "
                 "This implementation does NOT constitute, claim, or imply formal ISO 27001 "
                 "certification, organizational compliance, or accreditation. Formal certification "
                 "requires an independent third-party audit of the entire organizational Information "

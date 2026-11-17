@@ -62,6 +62,38 @@ class MitreMapper:
             "name": "File and Directory Discovery",
             "description": "Adversaries may enumerate files and directories or search in specific locations of the host filesystem.",
             "url": "https://attack.mitre.org/techniques/T1083/"
+        },
+        "T1105": {
+            "id": "T1105",
+            "tactic": "Command and Control",
+            "tactic_id": "TA0011",
+            "name": "Ingress Tool Transfer",
+            "description": "Adversaries may transfer tools or other files from an external system into a compromised environment.",
+            "url": "https://attack.mitre.org/techniques/T1105/"
+        },
+        "T1057": {
+            "id": "T1057",
+            "tactic": "Discovery",
+            "tactic_id": "TA0007",
+            "name": "Process Discovery",
+            "description": "Adversaries may attempt to get information about running processes on a system.",
+            "url": "https://attack.mitre.org/techniques/T1057/"
+        },
+        "T1016": {
+            "id": "T1016",
+            "tactic": "Discovery",
+            "tactic_id": "TA0007",
+            "name": "System Network Configuration Discovery",
+            "description": "Adversaries may look for details about the network configuration and settings of systems.",
+            "url": "https://attack.mitre.org/techniques/T1016/"
+        },
+        "T1548.003": {
+            "id": "T1548.003",
+            "tactic": "Privilege Escalation",
+            "tactic_id": "TA0004",
+            "name": "Abuse Elevation Control Mechanism: Sudo and Sudo Caching",
+            "description": "Adversaries may perform sudo operations to escalate privileges or execute commands as superuser.",
+            "url": "https://attack.mitre.org/techniques/T1548/003/"
         }
     }
 
@@ -73,12 +105,26 @@ class MitreMapper:
             "tactic_id": "TA0007",
             "rationale": "Verifies current user identity and privilege level (evaluating if root/superuser permissions are available)."
         },
+        "id": {
+            "technique_id": "T1033",
+            "name": "System Owner/User Discovery",
+            "tactic": "Discovery",
+            "tactic_id": "TA0007",
+            "rationale": "Queries numerical UID, GID, and group memberships to assess privilege level."
+        },
         "hostname": {
             "technique_id": "T1082",
             "name": "System Information Discovery",
             "tactic": "Discovery",
             "tactic_id": "TA0007",
             "rationale": "Identifies the host computer name, network naming conventions, and domain role."
+        },
+        "uname": {
+            "technique_id": "T1082",
+            "name": "System Information Discovery",
+            "tactic": "Discovery",
+            "tactic_id": "TA0007",
+            "rationale": "Queries Linux kernel version, OS release, and machine architecture for exploit targeting."
         },
         "pwd": {
             "technique_id": "T1083",
@@ -93,6 +139,48 @@ class MitreMapper:
             "tactic": "Discovery",
             "tactic_id": "TA0007",
             "rationale": "Enumerates directory contents, looking for sensitive files, source code, scripts, or readable credentials."
+        },
+        "curl": {
+            "technique_id": "T1105",
+            "name": "Ingress Tool Transfer",
+            "tactic": "Command and Control",
+            "tactic_id": "TA0011",
+            "rationale": "Downloads remote scripts, secondary payloads, or miners from external web servers."
+        },
+        "wget": {
+            "technique_id": "T1105",
+            "name": "Ingress Tool Transfer",
+            "tactic": "Command and Control",
+            "tactic_id": "TA0011",
+            "rationale": "Fetches remote malicious binaries, malware droppers, or stage-2 shell scripts."
+        },
+        "sudo": {
+            "technique_id": "T1548.003",
+            "name": "Abuse Elevation Control Mechanism: Sudo",
+            "tactic": "Privilege Escalation",
+            "tactic_id": "TA0004",
+            "rationale": "Attempts to escalate privileges to root via sudo."
+        },
+        "ps": {
+            "technique_id": "T1057",
+            "name": "Process Discovery",
+            "tactic": "Discovery",
+            "tactic_id": "TA0007",
+            "rationale": "Enumerates active processes to identify security monitoring agents or existing coinminers."
+        },
+        "ip": {
+            "technique_id": "T1016",
+            "name": "System Network Configuration Discovery",
+            "tactic": "Discovery",
+            "tactic_id": "TA0007",
+            "rationale": "Queries network interfaces, assigned IP addresses, and routing tables."
+        },
+        "ifconfig": {
+            "technique_id": "T1016",
+            "name": "System Network Configuration Discovery",
+            "tactic": "Discovery",
+            "tactic_id": "TA0007",
+            "rationale": "Enumerates local network interfaces, broadcast IPs, and subnet masks."
         },
         "exit": {
             "technique_id": "T1059.004",

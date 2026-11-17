@@ -40,7 +40,7 @@
         <td><code>{{ cmd.session_id }}</code></td>
         <td><strong style="color: #38bdf8; font-size: 0.95rem;"><code>{{ cmd.raw_command }}</code></strong></td>
         <td>
-          <a href="https://attack.mitre.org/techniques/{{ cmd.technique_id.replace('.', '/') }}/" target="_blank" style="color: #a78bfa; text-decoration: none; font-weight: 600;">
+          <a href="https://attack.mitre.org/techniques/{{ cmd.technique_id.replace('.', '/') }}/" target="_blank" rel="noopener noreferrer" style="color: #a78bfa; text-decoration: none; font-weight: 600;">
             {{ cmd.technique_id }} ({{ cmd.technique_name }})
           </a>
         </td>

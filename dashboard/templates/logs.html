@@ -21,7 +21,7 @@
 </div>
 
 <div class="table-card">
-  <h3>Sanitized JSON Event Records (<code>data/sanitized_cowrie.json</code> - {{ json_logs | length }} Records)</h3>
+  <h3>Sanitized JSON Event Records (<code>data/sanitized_cowrie.json</code> - {{ json_logs | length }} of {{ total_records }} Records Displayed)</h3>
   <div class="log-box">
 {% for record in json_logs %}
 {{ record | tojson }}

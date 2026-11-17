@@ -201,18 +201,22 @@ class SecurityVisualizer:
         cmap = plt.cm.get_cmap("RdYlGn_r")
         im = ax.imshow(grid, cmap=cmap, origin="lower", alpha=0.85, aspect="auto")
 
-        # Map our 5 specific risks onto coordinates (Impact - 1, Likelihood - 1)
-        # RSK-01: Likelihood 2, Impact 5 (Escapes) -> x=4, y=1
-        # RSK-02: Likelihood 2, Impact 4 (Pivot) -> x=3, y=1
-        # RSK-03: Likelihood 4, Impact 4 (Creds) -> x=3, y=3
-        # RSK-04: Likelihood 3, Impact 3 (DoS) -> x=2, y=2
-        # RSK-05: Likelihood 4, Impact 2 (Alert Fatigue) -> x=1, y=3
+        # Map our 7 specific risks onto coordinates (Likelihood - 1, Impact - 1)
+        # RSK-01: Likelihood 2, Impact 5 (Escapes) -> x=1, y=4
+        # RSK-02: Likelihood 2, Impact 4 (Pivot)   -> x=1, y=3
+        # RSK-03: Likelihood 4, Impact 4 (Creds)   -> x=3, y=3
+        # RSK-04: Likelihood 3, Impact 3 (DoS)     -> x=2, y=2
+        # RSK-05: Likelihood 4, Impact 2 (Fatigue) -> x=3, y=1
+        # RSK-06: Likelihood 3, Impact 2 (Evasion) -> x=2, y=1
+        # RSK-07: Likelihood 3, Impact 4 (Dashboard) -> x=2, y=3
         risks_to_plot = [
-            ("RSK-01", 1, 4),  # Likelihood 2 (idx 1), Impact 5 (idx 4)
-            ("RSK-02", 1, 3),  # Likelihood 2 (idx 1), Impact 4 (idx 3)
-            ("RSK-03", 3, 3),  # Likelihood 4 (idx 3), Impact 4 (idx 3)
-            ("RSK-04", 2, 2),  # Likelihood 3 (idx 2), Impact 3 (idx 2)
-            ("RSK-05", 3, 1),  # Likelihood 4 (idx 3), Impact 2 (idx 1)
+            ("RSK-01", 1, 4),
+            ("RSK-02", 1, 3),
+            ("RSK-03", 3, 3),
+            ("RSK-04", 2, 2),
+            ("RSK-05", 3, 1),
+            ("RSK-06", 2, 1),
+            ("RSK-07", 2, 3),
         ]
 
         for code, l_idx, i_idx in risks_to_plot:

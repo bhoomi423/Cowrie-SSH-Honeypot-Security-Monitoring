@@ -167,7 +167,7 @@ Each observed activity was cross-referenced against the MITRE ATT&CK Enterprise 
 
 > [!IMPORTANT]
 > **Academic Alignment Disclaimer:**  
-> This project demonstrates the technical implementation, logging capabilities, and threat monitoring principles referenced in ISO/IEC 27001:2022 Annex A controls (specifically A.8.15, A.8.16, A.8.20, A.8.24, A.5.24, A.5.25, and A.8.7). This implementation does NOT constitute, claim, or imply formal ISO 27001 certification, organizational compliance, or accreditation. Formal certification requires an independent third-party audit of the entire organizational Information Security Management System (ISMS), including executive governance, risk treatment plans, human resources policies, and continuous audit cycles.
+> This project demonstrates the technical implementation, logging capabilities, data protection, and threat monitoring principles referenced in ISO/IEC 27001:2022 Annex A controls (specifically A.8.15, A.8.16, A.8.12, A.8.20, A.8.24, A.8.9, A.8.8, A.5.24, A.5.25, and A.8.7). This implementation does NOT constitute, claim, or imply formal ISO 27001 certification, organizational compliance, or accreditation. Formal certification requires an independent third-party audit of the entire organizational Information Security Management System (ISMS), including executive governance, risk treatment plans, human resources policies, and continuous audit cycles.
 
 ### Evaluated ISO/IEC 27001:2022 Controls
 
@@ -183,6 +183,12 @@ Each observed activity was cross-referenced against the MITRE ATT&CK Enterprise 
 - **Project Technical Evidence:** `Real-time parsing and SOC monitoring dashboard tracking SSH connections, command timelines, and authentication events.`
 - **Scope & Limitations:** *Demonstrates detection and visualization techniques. Operational compliance requires continuous 24/7 SOC alerting and automated incident response workflows.*
 
+### Control A.8.12: Data leakage prevention (Technological controls)
+- **ISO Requirement Objective:** Data leakage prevention measures shall be applied to systems, networks and any other devices that process, store or transmit sensitive information.
+- **Honeypot Monitoring Relevance:** Honeypots capture attacker-supplied authentication data in plaintext, which could contain sensitive test passwords or inadvertently mirror valid corporate credentials. Robust data leakage controls isolate raw logs, exclude them via .gitignore from public Git repositories, and sanitize telemetry prior to presentation or ingestion.
+- **Project Technical Evidence:** `Automated regex data sanitization pipeline masking passwords to '[REDACTED]', .gitignore exclusion of raw cowrie.json/cowrie.log, and removal of raw credential logs from version control tracking.`
+- **Scope & Limitations:** *Protects against telemetry credential exposure in code repositories and reporting; enterprise environments require automated endpoint DLP and secret scanning.*
+
 ### Control A.8.20: Network security (Technological controls)
 - **ISO Requirement Objective:** Networks and network devices shall be secured, managed and controlled to protect information in systems and applications.
 - **Honeypot Monitoring Relevance:** Deploying Cowrie on an alternative port (2222) or inside an isolated network segment (DMZ/VLAN) diverts malicious reconnaissance away from production SSH (port 22) and protects underlying hosts.
@@ -194,6 +200,18 @@ Each observed activity was cross-referenced against the MITRE ATT&CK Enterprise 
 - **Honeypot Monitoring Relevance:** Cowrie negotiates SSH key exchange algorithms, ciphers, and MACs, and calculates the client HASSH fingerprint (e.g. aae6b9604f6f3356543709a376d7f657) to audit client cryptographic capabilities.
 - **Project Technical Evidence:** `Extraction and display of HASSH fingerprints, cipher suites, and key exchange algorithms in parser and dashboard.`
 - **Scope & Limitations:** *Covers inspection of inbound cryptographic parameters; does not establish enterprise key management procedures.*
+
+### Control A.8.9: Configuration management (Technological controls)
+- **ISO Requirement Objective:** Configurations, including security configurations, of hardware, software, services and networks shall be established, documented, implemented, monitored and reviewed.
+- **Honeypot Monitoring Relevance:** Cowrie relies on hardened baseline configurations (cowrie.cfg, userdb.txt, fs.pickle) where unprivileged runtime accounts, simulated architecture, and fake filesystem hierarchies are controlled to prevent host compromise.
+- **Project Technical Evidence:** `Dedicated non-root 'cowrie' service user, simulated Linux environment, and structured configuration management.`
+- **Scope & Limitations:** *Academic prototype; production environments require centralized configuration management (Ansible, Puppet) and automated integrity checks.*
+
+### Control A.8.8: Management of technical vulnerabilities (Technological controls)
+- **ISO Requirement Objective:** Information about technical vulnerabilities of information systems in use shall be obtained, the organization's exposure to such vulnerabilities evaluated and appropriate measures taken.
+- **Honeypot Monitoring Relevance:** Honeypots run complex emulated network protocol stacks (Twisted SSH). Staying secure requires continuous patch management of Python packages, host operating system (Ubuntu 24.04 LTS), and VM hypervisor.
+- **Project Technical Evidence:** `Tracking host platform security updates, pinning Python dependencies, and running in an isolated virtual machine.`
+- **Scope & Limitations:** *Demonstrates host patching considerations; does not replace enterprise vulnerability scanning and patch management tooling.*
 
 ### Control A.5.24: Information security incident management planning and preparation (Organizational controls)
 - **ISO Requirement Objective:** The organization shall plan and prepare for managing information security incidents by defining, establishing and communicating incident management processes.
@@ -221,11 +239,13 @@ Deploying deception technology in enterprise or academic environments introduces
 
 | Risk ID | Threat Event & Vulnerability | Likelihood (1-5) | Impact (1-5) | Risk Score | Risk Level | Prescribed Mitigation Measure | Residual Risk |
 | :--- | :--- | :---: | :---: | :---: | :---: | :--- | :---: |
-| **RSK-01** | **Honeypot Sandbox Escape & Host Compromise**<br>*Potential unpatched vulnerability in Twisted Python framework or Cowrie daemon allowing container/sandbox escape.* | Low (2) | Very High (5) | 10 | **Medium** | 1. Run Cowrie under a non-root unprivileged service account ('cowrie').<br>2. Deploy inside isolated Docker/LXC container or dedicated VM.<br>3. Keep host OS (Ubuntu 24.04) and Python packages updated with latest security patches.<br>4. Apply AppArmor / SELinux containment profiles. | Low |
+| **RSK-01** | **Honeypot Sandbox Escape & Host Compromise**<br>*Potential unpatched vulnerability in Twisted Python framework or Cowrie daemon allowing container/sandbox escape.* | Low (2) | Very High (5) | 10 | **Medium** | 1. Run Cowrie under a dedicated non-root unprivileged service account ('cowrie').<br>2. Deploy inside isolated Docker/LXC container or dedicated VM.<br>3. Keep host OS (Ubuntu 24.04) and Python packages updated with latest security patches.<br>4. Apply AppArmor / SELinux containment profiles. | Low |
 | **RSK-02** | **Honeypot Abused as Pivot / Lateral Movement Proxy**<br>*Unrestricted outbound network connectivity allowing an attacker who interacts with the honeypot to bounce traffic to other internal hosts.* | Low (2) | High (4) | 8 | **Medium** | 1. Implement strict egress firewall rules (iptables/ufw) blocking all outbound RFC 1918 traffic.<br>2. Disable SSH port forwarding in cowrie.cfg.<br>3. Isolate the honeypot in a dedicated DMZ or guest network segment. | Low |
-| **RSK-03** | **Plaintext Credential Exposure in Logs & Dashboards**<br>*Cowrie records all entered passwords in plaintext; logs or dashboards could leak sensitive internal or test credentials.* | High (4) | High (4) | 16 | **High** | 1. Automated data sanitization engine redacting passwords to '[REDACTED]' in data exports, UI, and reports.<br>2. Restrict filesystem permissions on raw log files (chmod 600 cowrie.json).<br>3. Enforce principle that honeypot passwords must never match legitimate corporate directory credentials. | Low (mitigated by project sanitization architecture) |
+| **RSK-03** | **Plaintext Credential Exposure in Logs & Git Repositories**<br>*Cowrie records all entered passwords in plaintext; raw logs tracked in version control or dashboards could leak sensitive internal or test credentials.* | High (4) | High (4) | 16 | **High** | 1. Automated data sanitization engine redacting passwords to '[REDACTED]' in data exports, UI, and reports.<br>2. Enforce strict .gitignore rules to prevent raw log files from being staged in Git.<br>3. Untrack raw logs (git rm --cached) from public repository.<br>4. Restrict filesystem permissions on raw log files (chmod 600 cowrie.json).<br>5. Enforce principle that honeypot passwords must never match legitimate corporate directory credentials. | Low (fully controlled by sanitization & repository isolation) |
 | **RSK-04** | **Denial of Service & Disk Exhaustion via Log Flooding**<br>*High-volume automated brute-force attacks or large TTY session logs exhausting VM disk storage or CPU.* | Medium (3) | Medium (3) | 9 | **Medium** | 1. Configure logrotate on cowrie.log and cowrie.json with strict file size caps.<br>2. Limit concurrent SSH connections per IP in cowrie.cfg.<br>3. Set dedicated disk partition quotas for /var/lib/cowrie. | Low |
 | **RSK-05** | **False Positive Alert Fatigue in Security Operations (SOC)**<br>*Internal authorized vulnerability scanning or testing triggering high-severity incident responses.* | High (4) | Low (2) | 8 | **Medium** | 1. Programmatic classification engine that identifies loopback (127.0.0.1) and known test IP ranges.<br>2. Tune SIEM alerting rules to differentiate between verification testing and unauthorized network probing. | Low |
+| **RSK-06** | **Honeypot Fingerprinting & Attacker Evasion**<br>*Adversaries probe system quirks (e.g. missing /proc entries, rigid command outputs, default Cowrie SSH banner) to detect deception and abort before full analysis.* | Medium (3) | Low (2) | 6 | **Low** | 1. Customize the SSH banner and client handshake algorithms to match legitimate target servers.<br>2. Populate rich fake filesystem entries and command outputs in fs.pickle.<br>3. Monitor client HASSH fingerprints to detect specialized scanner tools. | Low |
+| **RSK-07** | **Insecure Web SOC Dashboard Configuration**<br>*Monitoring dashboard exposed without authentication, missing HTTP security headers, or vulnerable to directory traversal.* | Medium (3) | High (4) | 12 | **Medium** | 1. Bind dashboard exclusively to loopback interface (127.0.0.1).<br>2. Enforce strict HTTP security headers (CSP, X-Content-Type-Options, X-Frame-Options, HSTS).<br>3. Sanitize and validate file paths using secure_filename and extension whitelisting on media endpoints.<br>4. Disable debug mode in production deployment. | Low (hardened in dashboard/app.py) |
 
 ---
 

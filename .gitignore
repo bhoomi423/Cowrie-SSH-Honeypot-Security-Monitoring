@@ -8,15 +8,34 @@ build/
 dist/
 *.egg-info/
 
-# Environments
+# Virtual Environments
 .env
+.env.*
 .venv
 env/
 venv/
 ENV/
 
-# IDE & OS
+# Sensitive Raw Honeypot Telemetry (Contains raw plaintext passwords)
+# Preserve local originals; never commit raw credentials to version control
+cowrie.json
+cowrie.log
+*.raw.json
+*.raw.log
+data/raw/
+data/raw_archive/
+
+# Cryptographic Keys & Secrets
+*.pem
+*.key
+*.pfx
+*.cer
+*.crt
+
+# IDE & OS Artifacts
 .vscode/
 .idea/
 Thumbs.db
 Desktop.ini
+*.swp
+*.bak
